@@ -1,0 +1,209 @@
+1. FILTERING,MUTATION -DPLY PACKAGES
+
+
+install.packages("dplyr")
+library(dplyr)
+library(MASS)
+glimpse(survey)
+head(survey)
+summary(survey)
+dplyr::select(survey, Clap:Age)
+dplyr::select(survey, Clap:Age, -M.I)
+survey %>% dplyr::mutate(Sex, dif = Wr.Hnd - NW.Hnd)
+?survey
+survey %>% dplyr::filter(Age > 22)
+survey %>% dplyr::filter(Age > 22) %>% group_by(Clap)
+survey %>% dplyr::filter(Height > 170) %>% summarize(avg = mean(Age))
+survey %>% dplyr::filter(Height > 170) %>% summarize(avg = mean(Pulse, na.rm = TRUE))
+survey %>% dplyr::filter(Age > 22) %>% dplyr::arrange(Age)
+survey %>% dplyr::filter(Age > 22) %>% dplyr::arrange(desc(Age))
+
+
+
+2. DECISION TREE CLASSIFIER
+hp<-read.csv("C:/Users/HP/Desktop/dataset/Data Mining Lab/r/diabetes.csv")
+d=hp$gender
+e=hp$age
+f=hp$hypertension
+g=hp$heart_disease
+h=hp$smoking_history
+i=hp$bmi
+j=hp$HbA1c_level
+k=hp$blood_glucose_level
+l=hp$diabetes
+sapply(hp,class)
+install.packages("party")
+library(party)
+sapply(hp,class)
+d<-factor(d)
+h<-factor(h)
+model=ctree(formula = l ~ d + e + f + g + h + i + j + k ,data= hp,controls =ctree_control(minsplit = 20,minbucket = 7))
+plot(model)
+
+
+
+3.MULTIPLE LINEAR REGRESSION
+
+ install.packages("mlbench")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("reshape2")
+install.packages("caTools")
+library(mlbench)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(caTools)
+dat = read.csv("C:/Users/HP/Desktop/dataset/Data Mining Lab/r/boston_housing.csv")
+print(dat)
+str(dat)
+summary(dat)
+split=sample.split(dat,SplitRatio = 0.70)
+train=subset(dat,split==TRUE)
+test=subset(dat,split==FALSE)
+model=lm(medv~crim+rm+tax+lstat,dat=train)
+summary(model)
+y=predict(model,test)
+head(y)
+error=(test$medv-y)
+rmse=sqrt(mean(error)^2)
+rmse
+ggplot(data=test,aes(medv,y)) +geom_point(alpha=0.5) +stat_smooth(aes(colour='black'))+xlab('Actual value of medv') + ylab('Predicted value of medv')+theme_bw()
+
+
+
+4.SIMPLE LINEAR REGRESSION
+
+data = read.csv("C:/Users/HP/Desktop/dataset/Data Mining Lab/r/Student_Marks.csv")
+print(data)
+training = data[seq(1, nrow(data), 2), ]
+verification = data[seq(2, nrow(data), 2), ]
+time_study = training[, 3]
+Marks = training[, 2]
+verification_time_study = verification[, 3]
+verification_Marks = verification[, 2]
+fit = lm(time_study ~ Marks)
+mean_diff = mean(time_study - verification_time_study)
+rmse = sqrt(sum((time_study - verification_time_study)^2) / length(time_study))
+cat("Mean Difference:", mean_diff, "\n")
+cat("Root Mean Squared Error (RMSE):", rmse, "\n")
+a = data.frame(Marks =7)
+result <- predict(fit, a)
+print(result)
+
+
+
+
+
+5. ASSOCIATION RULE MINING
+
+install.packages("arules")
+library(arules)
+data("Groceries")
+groceries.transactions<-as(Groceries,"transactions")
+summary(groceries.transactions)
+groceries_matrix<-as(Groceries,"matrix")
+groceries_df<-as.data.frame(as(groceries_matrix,"matrix"))
+print(groceries_df)
+frequent_itemsets<-eclat(groceries.transactions,parameter = list(supp=0.005,maxlen=10))
+rules<-ruleInduction(frequent_itemsets,transactions=groceries.transactions,confidence=0.1)
+rhs_items<-c("whole milk","butter")
+filtered_rules<-subset(rules,subset=rhs%in%rhs_items)
+inspect(filtered_rules)
+inspect(frequent_itemsets)
+inspect(rules)
+
+
+
+
+ 6. hirarchial clustering
+install.packages("dendextend")
+library(dendextend)
+install.packages("datasets")
+data("USJudgeRatings")
+install.packages("dendextend")
+library(dendextend)
+install.packages("datasets")
+library(cluster)
+distance <- dist(USJudgeRatings, method = "euclidean")
+distance
+mymodel <- agnes(distance, method = "ward")
+plot(mymodel, main = "Agglomerative Hierarchical Clustering - USJudgeRatings")
+groups <- cutree(mymodel, k = k)
+output <- cbind(USJudgeRatings, groups)
+
+
+
+
+
+7. k-means clustering 
+
+seed<-read.csv("C:/Users/Lenovo/Downloads/seed(2) (1).csv")
+model = kmeans(seed,3)
+model
+model$totss
+model$size
+model$centers
+model$betweens
+cluster =model$cluster
+cluster
+output =cbind(seed,cluster)
+output
+
+
+
+
+
+8. WORD CLOUD
+
+
+install.packages('tm')
+install.packages('wordcloud')
+install.packages('SnowballC')
+install.packages('RColorBrewer')
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+filePath<-"http://www.sthda.com/sthda/RDoc/example-files/martin-luther-king-i-have-a-dream-speech.txt"
+text <- readLines(filePath)
+docs <- Corpus(VectorSource(text))
+inspect(docs)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, removeWords, stopwords("english"))
+docs <- tm_map(docs, removeWords, c("blabla1", "blabla2"))
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, stripWhitespace)
+docs <- tm_map(docs, stemDocument)
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d, 10)
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,max.words=200, random.order=FALSE, rot.per=0.35,colors=brewer.pal(8, "Dark2"))
+
+
+
+9.DECOMPOSITION
+install.packages("ggfortify")
+install.packages("tseries")
+install.packages("forecast")
+library(ggfortify)
+library(tseries)
+library(forecast)
+data("AirPassengers")
+AP<-AirPassengers
+class(AP)
+sum(is.na(A))
+frequency(P)
+cycle(AP)
+plot(AP,xlab="Date",ylab="Passengers numbers(1000's)",main="Air Passenger numbers
+from1949 to 1961")
+autoplot(AP)+labs(x="Date",y="Passenger numbers(1000's"),title="Air Passengers from
+1949to 1961")
+boxplot(AP~cycle(AP),xlab = "Date",ylab="Passenger Numbers(1000's)",main="Monthly
+AirPassengers Boxplot from 1949 to 1961")
+decomposeAP<-decompose(AP,"multiplicative")
+autoplot(decomposeAP)
